@@ -1,31 +1,52 @@
-import {
-  Form,
-  redirect,
-  type ActionFunction,
-  type ActionFunctionArgs,
-} from "react-router";
-import { supabase } from "~/supabase-client";
+import { Form, useActionData, redirect } from "react-router";
+import type { ActionFunctionArgs } from "react-router";
+import { db } from "app/db";
+import { signup } from "app/db/schema";
+import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
 
-  if (!email || !password || !name) {
+  if (!name || !email || !password || !confirmPassword) {
     return { error: "Fill up all the fields" };
   }
 
-  const { error } = await supabase
-    .from("signup")
-    .insert({ name, email, password });
-  if (error) {
-    return { error: "Error signing up" };
+  if (password !== confirmPassword) {
+    return { error: "Passwords do not match" };
   }
 
-  return redirect("/");
+  const existingUser = await db
+    .select()
+    .from(signup)
+    .where(eq(signup.email, email));
+  if (existingUser.length > 0) {
+    return { error: "Email already registered" };
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    await db.insert(signup).values({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    return redirect("/");
+  } catch (err) {
+    console.error(err);
+    return { error: "Error signing up" };
+  }
 }
+
 export default function Signup() {
+  const actionData = useActionData<{ error?: string }>();
+
   return (
     <Form method="post">
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -33,7 +54,15 @@ export default function Signup() {
           <h2 className="text-2xl font-bold text-center text-green-800 mb-6">
             Sign Up
           </h2>
-          <form className="space-y-4">
+
+          {/* Error Alert */}
+          {actionData?.error && (
+            <div className="bg-red-100 text-red-700 p-3 mb-4 rounded">
+              {actionData.error}
+            </div>
+          )}
+
+          <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-1">Full Name</label>
               <input
@@ -86,7 +115,7 @@ export default function Signup() {
             >
               Create Account
             </button>
-          </form>
+          </div>
 
           <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{" "}

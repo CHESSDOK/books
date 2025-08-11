@@ -5,12 +5,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "react-router";
-
+} from "react-router-dom";
 import type { Route } from "./+types/root";
 import "./app.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { AuthProvider } from "./auth-context"; // Import AuthProvider
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,11 +45,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <div>
-      <Navbar />
-      <Outlet />
-      <Footer />
-    </div>
+    <AuthProvider>
+      {" "}
+      {/* Wrap your app with AuthProvider */}
+      <div>
+        <Navbar />
+        <Outlet />
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }
 

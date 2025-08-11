@@ -1,7 +1,7 @@
 // Footer.jsx
 import { Link } from "react-router-dom";
 import { FaInstagram, FaFacebook, FaTwitter } from "react-icons/fa";
-import bookLogo from "../components/books.jpg"; // replace with your local image
+import bookLogo from "../assets/book.jpg"; // replace with your local image
 
 export default function Footer() {
   return (

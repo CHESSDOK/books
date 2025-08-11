@@ -1,5 +1,9 @@
-import { NavLink } from "react-router";
+import { NavLink } from "react-router-dom";
+import { useAuth } from "../auth-context";
+
 export default function Navbar() {
+  const { isAuthenticated, logout } = useAuth();
+
   return (
     <nav className="w-full bg-white shadow-md">
       {/* Top row */}
@@ -23,20 +27,47 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Login / Signup */}
+        {/* Conditional rendering based on auth state */}
         <div className="flex justify-end space-x-2">
-          <NavLink
-            to="/login"
-            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded-full text-sm font-bold"
-          >
-            LOGIN
-          </NavLink>
-          <NavLink
-            to="/signup"
-            className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold"
-          >
-            SIGN UP
-          </NavLink>
+          {isAuthenticated ? (
+            <>
+              <NavLink
+                to="/profile"
+                className="text-orange-500 hover:text-orange-600 px-3 py-1 text-2xl"
+                title="Profile"
+              >
+                👤
+              </NavLink>
+              <NavLink
+                to="/cart"
+                className="text-orange-500 hover:text-orange-600 px-3 py-1 text-2xl"
+                title="Cart"
+              >
+                🛒
+              </NavLink>
+              <button
+                onClick={logout}
+                className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold"
+              >
+                LOGOUT
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink
+                to="/login"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded-full text-sm font-bold"
+              >
+                LOGIN
+              </NavLink>
+              <NavLink
+                to="/signup"
+                className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold"
+              >
+                SIGN UP
+              </NavLink>
+            </>
+          )}
         </div>
       </div>
 
